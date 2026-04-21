@@ -14,7 +14,8 @@ This project was created as a **Semester 2 Mini Project** for practical understa
 - ❌ Delete Student Record  
 - 📊 Sort Students by Marks  
 - 🔤 Sort Students by Name  
-- 📌 Menu Driven Interface  
+- 📌 Menu Driven Interface
+- 💾 Permanent data storage using students.txt
 
 ---
 
