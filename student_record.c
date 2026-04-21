@@ -6,12 +6,14 @@ struct Student {
     int roll;
     char name[50];
     float marks;
-    struct Student* next;
+    struct Student *next;
 };
 
-struct Student* head = NULL;
+struct Student *head = NULL;
 
-// Functions
+// Function declarations
+void loadFromFile();
+void saveToFile();
 void addStudent();
 void displayStudents();
 void searchStudent();
@@ -22,7 +24,9 @@ void sortByName();
 int main() {
     int choice;
 
-    while(1) {
+    loadFromFile();
+
+    while (1) {
         printf("\n===== Student Record System =====\n");
         printf("1. Add Student\n");
         printf("2. Display Students\n");
@@ -31,7 +35,7 @@ int main() {
         printf("5. Sort by Marks\n");
         printf("6. Sort by Name\n");
         printf("7. Exit\n");
-        printf("Enter choice: ");
+        printf("Enter your choice: ");
         scanf("%d", &choice);
 
         switch(choice) {
@@ -39,12 +43,62 @@ int main() {
             case 2: displayStudents(); break;
             case 3: searchStudent(); break;
             case 4: deleteStudent(); break;
-            case 5: sortByMarks(); break;
-            case 6: sortByName(); break;
-            case 7: exit(0);
+            case 5: sortByMarks(); saveToFile(); break;
+            case 6: sortByName(); saveToFile(); break;
+            case 7: saveToFile(); exit(0);
             default: printf("Invalid Choice!\n");
         }
     }
+}
+
+// Load records from file
+void loadFromFile() {
+    FILE *fp = fopen("students.txt", "r");
+    if(fp == NULL) return;
+
+    struct Student *newNode, *temp;
+
+    while(1) {
+        newNode = (struct Student*)malloc(sizeof(struct Student));
+
+        if(fscanf(fp, "%d,%49[^,],%f\n",
+            &newNode->roll,
+            newNode->name,
+            &newNode->marks) != 3) {
+            free(newNode);
+            break;
+        }
+
+        newNode->next = NULL;
+
+        if(head == NULL)
+            head = newNode;
+        else {
+            temp = head;
+            while(temp->next != NULL)
+                temp = temp->next;
+            temp->next = newNode;
+        }
+    }
+
+    fclose(fp);
+}
+
+// Save records to file
+void saveToFile() {
+    FILE *fp = fopen("students.txt", "w");
+    struct Student *temp = head;
+
+    while(temp != NULL) {
+        fprintf(fp, "%d,%s,%.2f\n",
+            temp->roll,
+            temp->name,
+            temp->marks);
+
+        temp = temp->next;
+    }
+
+    fclose(fp);
 }
 
 // Add Student
@@ -73,12 +127,13 @@ void addStudent() {
         temp->next = newNode;
     }
 
+    saveToFile();
     printf("Student Added Successfully!\n");
 }
 
 // Display
 void displayStudents() {
-    struct Student* temp = head;
+    struct Student *temp = head;
 
     if(head == NULL) {
         printf("No Records Found!\n");
@@ -89,6 +144,7 @@ void displayStudents() {
         printf("\nRoll: %d", temp->roll);
         printf("\nName: %s", temp->name);
         printf("\nMarks: %.2f\n", temp->marks);
+
         temp = temp->next;
     }
 }
@@ -96,7 +152,7 @@ void displayStudents() {
 // Search
 void searchStudent() {
     int roll;
-    struct Student* temp = head;
+    struct Student *temp = head;
 
     printf("Enter Roll No to Search: ");
     scanf("%d", &roll);
@@ -138,31 +194,25 @@ void deleteStudent() {
         prev->next = temp->next;
 
     free(temp);
+    saveToFile();
+
     printf("Record Deleted Successfully!\n");
 }
 
 // Sort by Marks
 void sortByMarks() {
     struct Student *i, *j;
-    int rollTemp;
-    char nameTemp[50];
-    float marksTemp;
+    int r;
+    char n[50];
+    float m;
 
-    for(i = head; i != NULL; i = i->next) {
-        for(j = i->next; j != NULL; j = j->next) {
+    for(i=head;i!=NULL;i=i->next) {
+        for(j=i->next;j!=NULL;j=j->next) {
             if(i->marks > j->marks) {
 
-                rollTemp = i->roll;
-                i->roll = j->roll;
-                j->roll = rollTemp;
-
-                strcpy(nameTemp, i->name);
-                strcpy(i->name, j->name);
-                strcpy(j->name, nameTemp);
-
-                marksTemp = i->marks;
-                i->marks = j->marks;
-                j->marks = marksTemp;
+                r=i->roll; i->roll=j->roll; j->roll=r;
+                strcpy(n,i->name); strcpy(i->name,j->name); strcpy(j->name,n);
+                m=i->marks; i->marks=j->marks; j->marks=m;
             }
         }
     }
@@ -173,25 +223,17 @@ void sortByMarks() {
 // Sort by Name
 void sortByName() {
     struct Student *i, *j;
-    int rollTemp;
-    char nameTemp[50];
-    float marksTemp;
+    int r;
+    char n[50];
+    float m;
 
-    for(i = head; i != NULL; i = i->next) {
-        for(j = i->next; j != NULL; j = j->next) {
-            if(strcmp(i->name, j->name) > 0) {
+    for(i=head;i!=NULL;i=i->next) {
+        for(j=i->next;j!=NULL;j=j->next) {
+            if(strcmp(i->name,j->name)>0) {
 
-                rollTemp = i->roll;
-                i->roll = j->roll;
-                j->roll = rollTemp;
-
-                strcpy(nameTemp, i->name);
-                strcpy(i->name, j->name);
-                strcpy(j->name, nameTemp);
-
-                marksTemp = i->marks;
-                i->marks = j->marks;
-                j->marks = marksTemp;
+                r=i->roll; i->roll=j->roll; j->roll=r;
+                strcpy(n,i->name); strcpy(i->name,j->name); strcpy(j->name,n);
+                m=i->marks; i->marks=j->marks; j->marks=m;
             }
         }
     }
